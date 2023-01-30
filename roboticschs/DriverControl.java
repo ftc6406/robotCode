@@ -18,6 +18,9 @@ public class DriverControl extends OpMode {
     private double x; // the x position of the left joystick (used to move robot left and right)
     private double y; // the y position of the left joystick (use to move robot forward and back)
     private double pivot; // the x position of the right joystick (use to rotate robot)
+    private int lowJunction = 0; // position of lowest junction
+    private int medJunction = 0; // position of medium junction
+    private int highJunction = 0; // position of highest junction
 
     // init runs once at the beginning when "INIT" is pressed
     // this is where we set left motors to reverse, assign
@@ -107,20 +110,63 @@ public class DriverControl extends OpMode {
     }
 
     // Purpose: to open and close the hook
-    // A is used to open the hook
-    // Y is used to close the hook
+    // left bumper is used to open the hook
+    // right bumper is used to close the hook
     public void moveHook(){
-        // if A is pressed
-        if(gamepad2.a){
+        // if left bumper is pressed
+        if(gamepad2.left_bumper){
             // move the servo to position 0.5, which is pressing down on the hook
             // this makes the hook open up
             hookServo.setPosition(0.5);
         }
-        // if Y is pressed
-        if(gamepad2.y){
+        // if right bumper is pressed
+        if(gamepad2.right_bumper){
             // move the servo to position 1.0, which lets go of the hook
             // this makes it close
             hookServo.setPosition(1.0);
+        }
+    }
+
+    // Purpose: for arm to reach set heights
+    // A: moves it to position 0 (lowest possible height and starting position)
+    // X: moves it to position of lowest junction
+    // B: moves it to position of medium junction
+    // Y: moves it to position of highest junction
+    public void setArmPositions(){
+        // if a is pressed
+        if(gamepad2.a){
+            armMotor.setTargetPosition(0); // set target position to lowest
+            armMotor.setPower(-1.0); // set negative power (all positions are higher than this)
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // run to position
+        }
+        // if x is pressed
+        if(gamepad2.x){
+            armMotor.setTargetPosition(lowJunction); // set position to low junction
+            // if current position is lower than position of low junction
+            if(armMotor.getCurrentPosition() <= lowJunction){
+                armMotor.setPower(1.0); // than power needs to be positive
+            } else{
+                armMotor.setPower(-1.0); // if position is higher, power needs to be negative
+            }
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // run to position
+        }
+        // if b is pressed
+        if(gamepad2.b){
+            armMotor.setTargetPosition(medJunction); // sets position to med junction
+            // if current position is lower than position of medium junction
+            if(armMotor.getCurrentPosition() <= medJunction){
+                armMotor.setPower(1.0); // than power needs to be positive
+            } else{
+                armMotor.setPower(-1.0); // if position is higher, power needs to be negative
+            }
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // run to position
+        }
+
+        // if y is pressed
+        if(gamepad2.y){
+            armMotor.setTargetPosition(highJunction); // sets position to high junction
+            armMotor.setPower(1.0); // than power needs to be positive (all positions are lower)
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // run to position
         }
     }
 
